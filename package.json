@@ -135,7 +135,8 @@
     "react-dom": "19.2.1",
     "@emoji-mart/react": {
       "react": "19.2.1"
-    }
+    },
+    "@tiptap/extensions": "3.14.0"
   },
   "prisma": {
     "schema": "./src/prisma/schema.prisma"
