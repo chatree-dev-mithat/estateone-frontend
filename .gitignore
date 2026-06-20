@@ -28,6 +28,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+env
 
 # vercel
 .vercel
@@ -40,3 +41,11 @@ next-env.d.ts
 src/assets/iconify-icons/generated-icons.js
 src/assets/iconify-icons/generated-icons.css
 /.idea
+
+# Project planning files at root level only
+/AGENT.md
+/AGENTS.md
+/PRD.md
+/PRO.md
+/SPEC.md
+/TASKS.md
