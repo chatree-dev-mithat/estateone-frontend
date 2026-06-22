@@ -81,6 +81,67 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='ri-circle-line' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
+        {/* ─── PMS Navigation ─── */}
+        <MenuSection label='Business'>
+          <MenuItem href={`/${locale}/pms/dashboard`} icon={<i className='ri-bar-chart-box-line' />}>
+            Dashboard
+          </MenuItem>
+          <SubMenu label='ทรัพย์สิน' icon={<i className='ri-building-2-line' />}>
+            <MenuItem href={`/${locale}/pms/properties`}>รายการโครงการ</MenuItem>
+            <MenuItem href={`/${locale}/pms/units`}>รายการยูนิต</MenuItem>
+          </SubMenu>
+          <MenuItem href={`/${locale}/pms/tenants`} icon={<i className='ri-group-line' />}>
+            ผู้เช่า
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/contracts`} icon={<i className='ri-file-text-line' />}>
+            สัญญาเช่า
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/invoices`} icon={<i className='ri-bill-line' />}>
+            ใบแจ้งหนี้
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/receipts`} icon={<i className='ri-receipt-line' />}>
+            ใบเสร็จ
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/reports`} icon={<i className='ri-pie-chart-2-line' />}>
+            รายงาน
+          </MenuItem>
+        </MenuSection>
+
+        <MenuSection label='Master Data'>
+          <MenuItem href={`/${locale}/pms/master/materials`} icon={<i className='ri-stack-line' />}>
+            รายการค่าใช้จ่าย
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/master/uom`} icon={<i className='ri-scales-line' />}>
+            หน่วยนับ
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/master/banks`} icon={<i className='ri-bank-line' />}>
+            ธนาคาร
+          </MenuItem>
+        </MenuSection>
+
+        <MenuSection label='User Access'>
+          <MenuItem href={`/${locale}/pms/users`} icon={<i className='ri-user-settings-line' />}>
+            ผู้ใช้งาน
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/users/work-groups`} icon={<i className='ri-shield-user-line' />}>
+            Work Group
+          </MenuItem>
+        </MenuSection>
+
+        <MenuSection label='System Config'>
+          <MenuItem href={`/${locale}/pms/config/parameters`} icon={<i className='ri-settings-3-line' />}>
+            Parameters
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/config/document-types`} icon={<i className='ri-file-settings-line' />}>
+            Document Type
+          </MenuItem>
+          <MenuItem href={`/${locale}/pms/config/company`} icon={<i className='ri-community-line' />}>
+            บริษัท / สาขา
+          </MenuItem>
+        </MenuSection>
+
+        {/* ─── Showcase (Template Examples) ─── */}
+        <SubMenu label='Showcase' icon={<i className='ri-layout-grid-line' />} defaultOpen>
         <SubMenu
           label={dictionary['navigation'].dashboards}
           icon={<i className='ri-home-smile-line' />}
@@ -389,6 +450,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem>
           </SubMenu>
         </MenuSection>
+        </SubMenu>
       </Menu>
       {/* <Menu
         popoutMenuOffset={{ mainAxis: 10 }}

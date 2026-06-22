@@ -1,121 +1,140 @@
-// Third-party Imports
 import CredentialProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import type { NextAuthOptions } from 'next-auth'
 
-export const authOptions: NextAuthOptions = {
+function decodeJwtPayload(token: string): Record<string, any> {
+  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+  return JSON.parse(Buffer.from(base64, 'base64').toString('utf8'))
+}
 
-  // ** Configure one or more authentication providers
-  // ** Please refer to https://next-auth.js.org/configuration/options#providers for more `providers` options
+async function refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; accessTokenExpires: number } | null> {
+  try {
+    const res = await fetch(`${process.env.API_URL}/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    })
+    const body = await res.json()
+    if (!res.ok || !body.success) return null
+
+    const payload = decodeJwtPayload(body.data.accessToken)
+    return {
+      accessToken: body.data.accessToken,
+      accessTokenExpires: payload.exp * 1000,
+    }
+  } catch {
+    return null
+  }
+}
+
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialProvider({
-      // ** The name to display on the sign in form (e.g. 'Sign in with...')
-      // ** For more details on Credentials Provider, visit https://next-auth.js.org/providers/credentials
       name: 'Credentials',
       type: 'credentials',
-
-      /*
-       * As we are using our own Sign-in page, we do not need to change
-       * username or password attributes manually in following credentials object.
-       */
       credentials: {},
       async authorize(credentials) {
-        /*
-         * You need to provide your own logic here that takes the credentials submitted and returns either
-         * an object representing a user or value that is false/null if the credentials are invalid.
-         * For e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-         * You can also use the `req` object to obtain additional parameters (i.e., the request IP address)
-         */
         const { email, password } = credentials as { email: string; password: string }
 
         try {
-          // ** Login API Call to match the user credentials and receive user data in response along with his role
-          const res = await fetch(`${process.env.API_URL}/login`, {
+          const res = await fetch(`${process.env.API_URL}/v1/auth/login`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
           })
 
-          const data = await res.json()
+          const body = await res.json()
 
-          if (res.status === 401) {
-            throw new Error(JSON.stringify(data))
+          if (!res.ok) {
+            const message = body?.error?.message ?? 'Login failed'
+            throw new Error(JSON.stringify({ message: [message] }))
           }
 
-          if (res.status === 200) {
-            /*
-             * Please unset all the sensitive information of the user either from API response or before returning
-             * user data below. Below return statement will set the user object in the token and the same is set in
-             * the session which will be accessible all over the app.
-             */
-            return data
-          }
+          const { accessToken, refreshToken, passwordExpired } = body.data
+          const payload = decodeJwtPayload(accessToken)
 
-          return null
+          return {
+            id: String(payload.userId),
+            name: payload.name,
+            email: payload.email,
+            role: payload.role,
+            companyId: payload.companyId,
+            branchId: payload.branchId,
+            accessToken,
+            refreshToken,
+            accessTokenExpires: payload.exp * 1000,
+            passwordExpired,
+          }
         } catch (e: any) {
           throw new Error(e.message)
         }
-      }
+      },
     }),
 
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
-    })
-
-    // ** ...add more providers here
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
   ],
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#session for more `session` options
   session: {
-    /*
-     * Choose how you want to save the user session.
-     * The default is `jwt`, an encrypted JWT (JWE) stored in the session cookie.
-     * If you use an `adapter` however, NextAuth default it to `database` instead.
-     * You can still force a JWT session by explicitly defining `jwt`.
-     * When using `database`, the session cookie will only contain a `sessionToken` value,
-     * which is used to look up the session in the database.
-     * If you use a custom credentials provider, user accounts will not be persisted in a database by NextAuth.js (even if one is configured).
-     * The option to use JSON Web Tokens for session tokens must be enabled to use a custom credentials provider.
-     */
     strategy: 'jwt',
-
-    // ** Seconds - How long until an idle session expires and is no longer valid
-    maxAge: 30 * 24 * 60 * 60 // ** 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#pages for more `pages` options
   pages: {
-    signIn: '/login'
+    signIn: '/login',
   },
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#callbacks for more `callbacks` options
   callbacks: {
-    /*
-     * While using `jwt` as a strategy, `jwt()` callback will be called before
-     * the `session()` callback. So we have to add custom parameters in `token`
-     * via `jwt()` callback to make them accessible in the `session()` callback
-     */
     async jwt({ token, user }) {
+      // login ครั้งแรก — copy user → token
       if (user) {
-        /*
-         * For adding custom parameters to user in session, we first need to add those parameters
-         * in token which then will be available in the `session()` callback
-         */
+        token.id = user.id
         token.name = user.name
+        token.role = user.role
+        token.companyId = user.companyId
+        token.branchId = user.branchId
+        token.accessToken = user.accessToken
+        token.refreshToken = user.refreshToken
+        token.accessTokenExpires = user.accessTokenExpires
+        token.passwordExpired = user.passwordExpired
+        return token
       }
 
-      return token
+      // token ยังไม่หมดอายุ (เผื่อ 1 นาที)
+      if (Date.now() < token.accessTokenExpires - 60_000) {
+        return token
+      }
+
+      // refresh
+      const refreshed = await refreshAccessToken(token.refreshToken)
+      if (!refreshed) {
+        return { ...token, error: 'RefreshTokenError' as const }
+      }
+
+      return {
+        ...token,
+        accessToken: refreshed.accessToken,
+        accessTokenExpires: refreshed.accessTokenExpires,
+        error: undefined,
+      }
     },
-    async session({ session, token }) {
-      if (session.user) {
-        // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
-        session.user.name = token.name
-      }
 
+    async session({ session, token }) {
+      session.accessToken = token.accessToken
+      session.refreshToken = token.refreshToken
+      session.accessTokenExpires = token.accessTokenExpires
+      session.error = token.error
+      session.user = {
+        id: token.id,
+        name: token.name ?? '',
+        email: token.email ?? '',
+        role: token.role,
+        companyId: token.companyId,
+        branchId: token.branchId,
+      }
       return session
-    }
-  }
+    },
+  },
 }

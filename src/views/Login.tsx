@@ -86,8 +86,8 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@materio.com',
-      password: 'admin'
+      email: 'admin@mithat.co.th',
+      password: 'p@ssw0rd'
     }
   })
 
@@ -112,14 +112,18 @@ const Login = ({ mode }: { mode: Mode }) => {
 
     if (res && res.ok && res.error === null) {
       // Vars
-      const redirectURL = searchParams.get('redirectTo') ?? '/'
+      const redirectURL = searchParams.get('redirectTo') ?? '/pms/dashboard'
 
       router.replace(getLocalizedUrl(redirectURL, locale as Locale))
     } else {
       if (res?.error) {
-        const error = JSON.parse(res.error)
+        try {
+          const error = JSON.parse(res.error)
 
-        setErrorState(error)
+          setErrorState(error)
+        } catch {
+          setErrorState({ message: [res.error] })
+        }
       }
     }
   }
@@ -158,8 +162,8 @@ const Login = ({ mode }: { mode: Mode }) => {
           </div>
           <Alert icon={false} className='bg-primaryLight'>
             <Typography variant='body2' color='primary.main'>
-              Email: <span className='font-medium'>admin@materio.com</span> / Pass:{' '}
-              <span className='font-medium'>admin</span>
+              Email: <span className='font-medium'>admin@mithat.co.th</span> / Pass:{' '}
+              <span className='font-medium'>p@ssw0rd</span>
             </Typography>
           </Alert>
 

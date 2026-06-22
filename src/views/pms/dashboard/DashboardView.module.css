@@ -1,0 +1,61 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  font-weight: 700;
+}
+
+/* KPI Card */
+.kpiCard {
+  height: 100%;
+}
+
+.kpiContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem !important;
+}
+
+.kpiIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.kpiIconWrapper[data-color='primary'] {
+  background-color: var(--mui-palette-primary-lightOpacity);
+  color: var(--mui-palette-primary-main);
+}
+
+.kpiIconWrapper[data-color='success'] {
+  background-color: var(--mui-palette-success-lightOpacity);
+  color: var(--mui-palette-success-main);
+}
+
+.kpiIconWrapper[data-color='warning'] {
+  background-color: var(--mui-palette-warning-lightOpacity);
+  color: var(--mui-palette-warning-main);
+}
+
+.kpiIconWrapper[data-color='error'] {
+  background-color: var(--mui-palette-error-lightOpacity);
+  color: var(--mui-palette-error-main);
+}
+
+.kpiIcon {
+  font-size: 1.5rem;
+}
