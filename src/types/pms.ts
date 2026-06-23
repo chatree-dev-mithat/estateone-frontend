@@ -183,23 +183,51 @@ export interface Bank extends AuditFields {
 
 export interface Province {
   id: number
-  nameTh: string
-  nameEn: string
+  code: string
+  name: string
+  nameEng: string
+  status: string
 }
 
 export interface Amphur {
   id: number
+  code: string
+  name: string
   mProvinceId: number
-  nameTh: string
-  nameEn: string
+  mProvinceCode: string
+  status: string
 }
 
 export interface Tambon {
   id: number
+  code: string
+  name: string
+  nameEng: string
   mAmphurId: number
-  nameTh: string
-  nameEn: string
-  postCode: string
+  mAmphurName: string
+  mProvinceName: string
+  status: string
+}
+
+export interface Postal {
+  id: number
+  code: string
+  name: string
+  mTambonId: number
+  tambonName: string
+  amphurName: string
+  provinceName: string
+  status: string
+}
+
+export interface StreetName {
+  id: number
+  code: string
+  name: string
+  description: string | null
+  status: string
+  statusName: string | null
+  seq: number
 }
 
 // ============================================================

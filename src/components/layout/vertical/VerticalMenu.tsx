@@ -117,6 +117,13 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           <MenuItem href={`/${locale}/pms/master/banks`} icon={<i className='ri-bank-line' />}>
             ธนาคาร
           </MenuItem>
+          <SubMenu label='Address Info' icon={<i className='ri-map-pin-2-line' />}>
+            <MenuItem href={`/${locale}/pms/master/address/streets`}>ชื่อถนน</MenuItem>
+            <MenuItem href={`/${locale}/pms/master/address/tambons`}>แขวง / ตำบล</MenuItem>
+            <MenuItem href={`/${locale}/pms/master/address/amphurs`}>เขต / อำเภอ</MenuItem>
+            <MenuItem href={`/${locale}/pms/master/address/provinces`}>จังหวัด</MenuItem>
+            <MenuItem href={`/${locale}/pms/master/address/postals`}>รหัสไปรษณีย์</MenuItem>
+          </SubMenu>
         </MenuSection>
 
         <MenuSection label='User Access'>
